@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get App — Emuvlucht</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #7cffa4;
+      --accent2: #a78bfa;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+    }
+
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,255,164,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,255,164,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .box {
+      position: relative; z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2.5rem 2rem;
+      max-width: 480px; width: 100%;
+      margin: 1rem;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--accent); background: rgba(124,255,164,.08);
+      border: 1px solid rgba(124,255,164,.25);
+      padding: .3rem .75rem; border-radius: 6px;
+      margin-bottom: 1.4rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem; font-weight: 800;
+      letter-spacing: -.02em; margin-bottom: .5rem;
+    }
+
+    .sub { font-size: .8rem; color: var(--muted); margin-bottom: 2rem; line-height: 1.6; }
+
+    /* progress bar */
+    .progress-wrap {
+      background: var(--border); border-radius: 999px;
+      height: 4px; overflow: hidden; margin-bottom: .7rem;
+    }
+    .progress-bar {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      width: 0%;
+      transition: width .4s ease;
+    }
+
+    .status-line {
+      font-size: .75rem; color: var(--muted); margin-bottom: 2rem;
+    }
+    .status-line span { color: var(--accent); }
+
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table tr { border-top: 1px solid var(--border); }
+    .info-table td {
+      padding: .65rem 0; font-size: .78rem; vertical-align: top;
+    }
+    .info-table .k { color: var(--muted); width: 45%; }
+    .info-table .v { color: var(--text); word-break: break-all; }
+    .info-table .v.accent { color: var(--accent); }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: .4rem;
+      margin-top: 1.8rem; font-size: .78rem;
+      color: var(--muted); text-decoration: none;
+      transition: color .15s;
+    }
+    .btn-back:hover { color: var(--accent); }
+
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 1.5px solid var(--accent);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: .3rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- 
+    ╔══════════════════════════════════════════════════╗
+    ║  DAEMON READS THIS LINE — JANGAN DIHAPUS         ║
+    ║  Edit URL di bawah ke APK terbaru Anda           ║
+    ╚══════════════════════════════════════════════════╝
+  -->
+  <script>
+    // ── EDIT BARIS INI ── ganti dengan URL APK terbaru Anda
+    var redirectUrl = "https://github.com/OWNER/REPO/releases/download/v2.5.3/app25301.apk";
+  </script>
+
+  <div class="box">
+    <div class="tag">getApp endpoint</div>
+    <h1>Redirect ke APK</h1>
+    <p class="sub">Memuat versi terbaru. Unduhan akan dimulai otomatis dalam beberapa detik…</p>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="bar"></div>
+    </div>
+    <div class="status-line" id="status">
+      <span class="spinner"></span> Mendeteksi versi terbaru…
+    </div>
+
+    <table class="info-table" id="info-table">
+      <tr><td class="k">endpoint</td><td class="v accent">get.emuvlucht.my.id/getApp/</td></tr>
+      <tr><td class="k">redirect url</td><td class="v" id="td-url">–</td></tr>
+      <tr><td class="k">filename</td><td class="v" id="td-name">–</td></tr>
+      <tr><td class="k">versi</td><td class="v" id="td-ver">–</td></tr>
+    </table>
+
+    <a href="../" class="btn-back">← Kembali ke halaman utama</a>
+  </div>
+
+  <script>
+    (function () {
+      var bar  = document.getElementById('bar');
+      var stat = document.getElementById('status');
+      var tdUrl  = document.getElementById('td-url');
+      var tdName = document.getElementById('td-name');
+      var tdVer  = document.getElementById('td-ver');
+
+      // ── parse filename & version dari redirectUrl ──
+      function parseVersion(url) {
+        var base = url.split('/').pop();          // app25301.apk
+        var num  = base.replace('app','').replace('.apk',''); // "25301"
+        if (num.length >= 5) {
+          var major = num[0], minor = num[1], patch = num[2], build = num.slice(3,5);
+          return {
+            filename: 'com.kcstream.cing_' + major + '.' + minor + '.' + patch + '-build' + build + '.apk',
+            version : major + '.' + minor + '.' + patch + ' build ' + build
+          };
+        }
+        return { filename: base, version: '–' };
+      }
+
+      var info = parseVersion(redirectUrl);
+      tdUrl.textContent  = redirectUrl;
+      tdName.textContent = info.filename;
+      tdVer.textContent  = info.version;
+
+      // animate progress then redirect
+      var p = 0;
+      var iv = setInterval(function () {
+        p += (p < 80 ? 3 : 0.6);
+        if (p >= 100) { p = 100; clearInterval(iv); }
+        bar.style.width = p + '%';
+      }, 60);
+
+      setTimeout(function () {
+        stat.innerHTML = '<span style="color:var(--accent)">✓</span> Mengalihkan…';
+      }, 1200);
+
+      setTimeout(function () {
+        window.location.href = redirectUrl;
+      }, 2200);
+    })();
+  </script>
+</body>
+</html>

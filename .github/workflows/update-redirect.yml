@@ -1,0 +1,56 @@
+name: Update APK Redirect
+
+on:
+  # Trigger saat ada release baru
+  release:
+    types: [published]
+  # Atau jalankan manual
+  workflow_dispatch:
+    inputs:
+      apk_url:
+        description: 'URL langsung ke file APK'
+        required: true
+
+jobs:
+  update-redirect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set APK URL
+        id: set-url
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            # Ambil URL APK dari asset release terbaru
+            APK_URL=$(echo '${{ toJson(github.event.release.assets) }}' \
+              | python3 -c "import sys,json; assets=json.load(sys.stdin); \
+                apk=[a for a in assets if a['name'].endswith('.apk')]; \
+                print(apk[0]['browser_download_url'] if apk else '')")
+          else
+            APK_URL="${{ github.event.inputs.apk_url }}"
+          fi
+          echo "APK_URL=$APK_URL" >> $GITHUB_ENV
+          echo "Found: $APK_URL"
+
+      - name: Update getApp/index.html
+        run: |
+          if [ -z "$APK_URL" ]; then
+            echo "Tidak ada APK URL, skip."
+            exit 0
+          fi
+          # Replace baris var redirectUrl
+          sed -i "s|var redirectUrl = \"[^\"]*\";|var redirectUrl = \"$APK_URL\";|g" \
+            getApp/index.html
+          echo "Updated redirectUrl to: $APK_URL"
+
+      - name: Commit & Push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add getApp/index.html
+          git diff --staged --quiet && echo "No change" || \
+            (git commit -m "chore: update redirectUrl → $APK_URL" && git push)

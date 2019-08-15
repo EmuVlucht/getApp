@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emuvlucht — Download Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a0f;
+      --surface:  #111118;
+      --border:   #1e1e2e;
+      --accent:   #7cffa4;
+      --accent2:  #a78bfa;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --danger:   #ff6b6b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── noise overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── grid ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,255,164,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,255,164,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── glow orb ── */
+    .orb {
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,255,164,.12) 0%, transparent 70%);
+      top: -200px; left: -200px;
+      pointer-events: none;
+      animation: orb-drift 12s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    @keyframes orb-drift {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(200px, 150px); }
+    }
+
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-size: 1.1rem; font-weight: 800; letter-spacing: -.01em;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+    .nav-badge {
+      font-size: .7rem; font-family: 'DM Mono', monospace;
+      background: var(--border); color: var(--muted);
+      padding: .25rem .6rem; border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    main {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 5rem 2rem 4rem;
+    }
+
+    .eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .eyebrow::before {
+      content: '';
+      display: inline-block; width: 24px; height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 1.06;
+      letter-spacing: -.03em;
+      margin-bottom: 1.6rem;
+    }
+    h1 span { color: var(--accent); }
+
+    .subtitle {
+      font-size: 1.05rem; color: var(--muted);
+      line-height: 1.7; max-width: 540px;
+      margin-bottom: 2.8rem;
+    }
+
+    .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .8rem 1.6rem;
+      border-radius: 8px; font-weight: 700; font-size: .95rem;
+      text-decoration: none; transition: all .18s ease;
+      cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: var(--accent); color: #0a0a0f;
+    }
+    .btn-primary:hover { background: #5deba0; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,255,164,.25); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-2px); }
+
+    /* ── version card ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem; margin-top: 4rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--accent2); transform: translateY(-3px); }
+    .card-icon { font-size: 1.8rem; margin-bottom: .8rem; }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+    .card-desc { font-size: .82rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── version info ── */
+    .version-block {
+      margin-top: 4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .version-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .version-header h2 { font-size: .95rem; font-weight: 700; }
+    .badge-live {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .7rem; font-family: 'DM Mono', monospace;
+      color: var(--accent); background: rgba(124,255,164,.1);
+      padding: .25rem .7rem; border-radius: 999px;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.6s infinite; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: .3; }
+    }
+    .version-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .85rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .85rem;
+    }
+    .version-row:last-child { border-bottom: none; }
+    .version-row .label { color: var(--muted); font-family: 'DM Mono', monospace; }
+    .version-row .val { font-weight: 600; font-family: 'DM Mono', monospace; color: var(--accent); }
+
+    footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 2rem;
+      font-size: .78rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="orb"></div>
+
+  <nav>
+    <div class="logo">// emuvlucht</div>
+    <div class="nav-badge">get.emuvlucht.my.id</div>
+  </nav>
+
+  <main>
+    <div class="eyebrow">APK Distribution</div>
+
+    <h1>Download <span>Emuvlucht</span><br />App Center</h1>
+
+    <p class="subtitle">
+      Unduh versi terbaru aplikasi Emuvlucht secara otomatis.
+      Script daemon akan memantau dan mengunduh APK terbaru setiap 6 jam.
+    </p>
+
+    <div class="btn-row">
+      <a href="./getApp/" class="btn btn-primary">
+        ⬇ Ambil APK Terbaru
+      </a>
+      <a href="https://github.com" class="btn btn-ghost" target="_blank">
+        ⌥ GitHub Releases
+      </a>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">Auto-Update Daemon</div>
+        <div class="card-desc">Script daemon cek versi baru setiap 6 jam dan unduh otomatis ke server.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Versioning Otomatis</div>
+        <div class="card-desc">Nama file APK mengikuti format <code style="color:var(--accent2)">com.kcstream.cing_x.x.x-buildXX.apk</code>.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <div class="card-title">Custom Domain</div>
+        <div class="card-desc">Dihosting di GitHub Pages dengan domain <code style="color:var(--accent2)">get.emuvlucht.my.id</code>.</div>
+      </div>
+    </div>
+
+    <div class="version-block">
+      <div class="version-header">
+        <h2>Status Endpoint</h2>
+        <div class="badge-live"><span class="dot"></span> LIVE</div>
+      </div>
+      <div class="version-row">
+        <span class="label">getApp endpoint</span>
+        <span class="val">get.emuvlucht.my.id/getApp/</span>
+      </div>
+      <div class="version-row">
+        <span class="label">method</span>
+        <span class="val">HTML · var redirectUrl</span>
+      </div>
+      <div class="version-row">
+        <span class="label">daemon interval</span>
+        <span class="val">21600s (6h)</span>
+      </div>
+      <div class="version-row">
+        <span class="label">format APK</span>
+        <span class="val">com.kcstream.cing_X.X.X-buildXX.apk</span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Emuvlucht · <a href="./getApp/">getApp Endpoint</a>
+  </footer>
+</body>
+</html>
